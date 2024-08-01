@@ -1,0 +1,7 @@
+[package]
+name = "dippo-sample"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+dippo = {path = "../dippo/"}
