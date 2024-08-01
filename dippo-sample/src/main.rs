@@ -9,12 +9,13 @@ mod presentations;
 //use crate::infrastructures::user_repository_impl::UserRepositoryImpl;
 //use crate::presentations::presenter::UserPresenter;
 use crate::applications::user_usecase::user_input_port::UserInputPort;
-use crate::dippotamus::initialize_di;
+use crate::dippotamus::initialize;
 use crate::presentations::controller::UserController;
 
 fn main() {
     // Using Dependency Injection with Dippo
-    let container = initialize_di();
+    let container = initialize();
+    //サービスをはきだす
     let user_interactor = container.spit_up::<dyn UserInputPort>().unwrap();
     let controller = UserController::new(user_interactor);
 

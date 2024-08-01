@@ -27,18 +27,12 @@ impl DippotamusContainer {
     }
 
     // サービスを解決する（依存関係を解決する）
-    pub fn spit_up<T: 'static>(&self) -> Result<Box<dyn Any + '_>, SpitUpError> {
+    pub fn spit_up<T: 'static>(&self) -> Result<&T, SpitUpError> {
         let type_id = TypeId::of::<T>();
-
-        if let Some(service) = self.services.get(&type_id) {
-            Ok(service
-                .as_any()
-                .downcast_ref::<T>()
-                .map(|value| Box::new(value) as Box<dyn Any>)
-                .ok_or(SpitUpError::NotFound)?)
-        } else {
-            Err(SpitUpError::NotFound)
-        }
+        self.services
+            .get(&type_id)
+            .and_then(|service| service.as_any().downcast_ref::<T>())
+            .ok_or(SpitUpError::NotFound)
     }
 }
 

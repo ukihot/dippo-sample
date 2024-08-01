@@ -9,10 +9,10 @@ use crate::domains::user::user_repository::UserRepository;
 use crate::infrastructures::user_repository_impl::UserRepositoryImpl;
 use crate::presentations::presenter::UserPresenter;
 
-pub fn initialize_di() -> DippotamusContainer {
+pub fn initialize() -> DippotamusContainer {
     let mut container = DippotamusContainer::new();
 
-    // サービスを登録
+    // サービスをためこむ
     container.stockpile::<dyn UserRepository>(UserRepositoryImpl);
     container.stockpile::<dyn UserOutputPort>(UserPresenter);
     container.stockpile::<dyn UserInputPort>(UserInteractor);
