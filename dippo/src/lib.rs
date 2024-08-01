@@ -1,25 +1,61 @@
+mod dippo_error;
+
+use std::any::{Any, TypeId};
 use std::collections::HashMap;
-use std::any::TypeId;
+use crate::dippo_error::StockpileError;
+use crate::dippo_error::SpitUpError;
 
 pub struct DippotamusContainer {
-    registry: HashMap<TypeId, Box<dyn Fn() -> Box<dyn std::any::Any>>>,
+    services: HashMap<TypeId, Box<dyn Any>>,
 }
 
 impl DippotamusContainer {
-    // Create a new container
     pub fn new() -> Self {
         DippotamusContainer {
-            registry: HashMap::new(),
+            services: HashMap::new(),
         }
     }
 
-    // Register a type with its implementation
-    pub fn register<T: 'static, F: Fn() -> T + 'static>(&mut self, factory: F) {
-        self.registry.insert(TypeId::of::<T>(), Box::new(move || Box::new(factory())));
+    // サービスを登録する
+    pub fn stockpile<T: 'static + Default>(&mut self) -> Result<(), StockpileError> {
+        let type_id = TypeId::of::<T>();
+        if self.services.contains_key(&type_id) {
+            return Err(StockpileError::AlreadyRegistered);
+        }
+        self.services.insert(type_id, Box::new(T::default()));
+        Ok(())
     }
 
-    // Resolve a type
-    pub fn resolve<T: 'static>(&self) -> Option<Box<T>> {
-        self.registry.get(&TypeId::of::<T>()).map(|factory| factory().downcast::<T>().ok().unwrap())
+    pub fn stockpile_with_impl<T: 'static>(&mut self, service: T) -> Result<(), StockpileError> {
+        let type_id = TypeId::of::<T>();
+        if self.services.contains_key(&type_id) {
+            return Err(StockpileError::AlreadyRegistered);
+        }
+        self.services.insert(type_id, Box::new(service));
+        Ok(())
+    }
+
+    // サービスを解決する（依存関係を解決する）
+    pub fn spit_up<T: 'static>(&self) -> Result<Box<dyn Any + '_>, SpitUpError> {
+        let type_id = TypeId::of::<T>();
+
+        if let Some(service) = self.services.get(&type_id) {
+            Ok(service.as_any().downcast_ref::<T>()
+                .map(|value| Box::new(value) as Box<dyn Any>)
+                .ok_or(SpitUpError::NotFound)?)
+        } else {
+            Err(SpitUpError::NotFound)
+        }
+    }
+}
+
+// `Any`トレイトを拡張して、型のダウンキャストをサポートする
+trait AsAny {
+    fn as_any(&self) -> &dyn Any;
+}
+
+impl<T: Any> AsAny for T {
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }
