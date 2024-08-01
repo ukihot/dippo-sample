@@ -1,9 +1,9 @@
 mod dippo_error;
 
+use crate::dippo_error::SpitUpError;
+use crate::dippo_error::StockpileError;
 use std::any::{Any, TypeId};
 use std::collections::HashMap;
-use crate::dippo_error::StockpileError;
-use crate::dippo_error::SpitUpError;
 
 pub struct DippotamusContainer {
     services: HashMap<TypeId, Box<dyn Any>>,
@@ -31,7 +31,9 @@ impl DippotamusContainer {
         let type_id = TypeId::of::<T>();
 
         if let Some(service) = self.services.get(&type_id) {
-            Ok(service.as_any().downcast_ref::<T>()
+            Ok(service
+                .as_any()
+                .downcast_ref::<T>()
                 .map(|value| Box::new(value) as Box<dyn Any>)
                 .ok_or(SpitUpError::NotFound)?)
         } else {

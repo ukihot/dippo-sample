@@ -8,8 +8,8 @@ mod presentations;
 //use crate::applications::user_usecase::user_interactor::UserInteractor;
 //use crate::infrastructures::user_repository_impl::UserRepositoryImpl;
 //use crate::presentations::presenter::UserPresenter;
-use crate::dippotamus::initialize_di;
 use crate::applications::user_usecase::user_input_port::UserInputPort;
+use crate::dippotamus::initialize_di;
 use crate::presentations::controller::UserController;
 
 fn main() {
