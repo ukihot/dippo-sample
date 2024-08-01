@@ -29,10 +29,9 @@ impl DippotamusContainer {
     // サービスを解決する（依存関係を解決する）
     pub fn spit_up<T: 'static>(&self) -> Result<&T, SpitUpError> {
         let type_id = TypeId::of::<T>();
-        self.services
-            .get(&type_id)
-            .and_then(|service| service.as_any().downcast_ref::<T>())
-            .ok_or(SpitUpError::NotFound)
+        let service = self.services.get(&type_id).ok_or(SpitUpError::NotFound)?;
+
+        service.downcast_ref::<T>().ok_or(SpitUpError::NotFound)
     }
 }
 
