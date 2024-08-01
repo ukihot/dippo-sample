@@ -1,53 +1,25 @@
-use std::any::{Any, TypeId};
 use std::collections::HashMap;
-use std::sync::Arc;
+use std::any::TypeId;
 
 pub struct DippotamusContainer {
-    services: HashMap<TypeId, Box<dyn Any>>,
-    registrations: HashMap<TypeId, TypeId>,
+    registry: HashMap<TypeId, Box<dyn Fn() -> Box<dyn std::any::Any>>>,
 }
 
 impl DippotamusContainer {
+    // Create a new container
     pub fn new() -> Self {
-        Self {
-            services: HashMap::new(),
-            registrations: HashMap::new(),
+        DippotamusContainer {
+            registry: HashMap::new(),
         }
     }
 
-    pub fn register<T: 'static + Default, U: 'static + Default>(&mut self) {
-        self.registrations
-            .insert(TypeId::of::<T>(), TypeId::of::<U>());
-        self.services
-            .insert(TypeId::of::<U>(), Box::new(U::default()));
+    // Register a type with its implementation
+    pub fn register<T: 'static, F: Fn() -> T + 'static>(&mut self, factory: F) {
+        self.registry.insert(TypeId::of::<T>(), Box::new(move || Box::new(factory())));
     }
 
-    pub fn resolve<T: 'static + Clone>(&self) -> Option<Arc<T>> {
-        let type_id = TypeId::of::<T>();
-        if let Some(&registered_type_id) = self.registrations.get(&type_id) {
-            if let Some(service) = self.services.get(&registered_type_id) {
-                if let Some(service) = service.downcast_ref::<T>() {
-                    return Some(Arc::new(service.clone()));
-                }
-            }
-        }
-        None
-    }
-
-    pub fn resolve_recursive<T: 'static + Clone>(&self) -> Option<Arc<T>> {
-        let type_id = TypeId::of::<T>();
-        if let Some(&registered_type_id) = self.registrations.get(&type_id) {
-            if let Some(service) = self.services.get(&registered_type_id) {
-                if let Some(service) = service.downcast_ref::<T>() {
-                    return Some(Arc::new(service.clone()));
-                } else {
-                    // 再帰的に解決する方法
-                    if let Some(service) = self.resolve_recursive::<T>() {
-                        return Some(service);
-                    }
-                }
-            }
-        }
-        None
+    // Resolve a type
+    pub fn resolve<T: 'static>(&self) -> Option<Box<T>> {
+        self.registry.get(&TypeId::of::<T>()).map(|factory| factory().downcast::<T>().ok().unwrap())
     }
 }
