@@ -17,16 +17,7 @@ impl DippotamusContainer {
     }
 
     // サービスを登録する
-    pub fn stockpile<T: 'static + Default>(&mut self) -> Result<(), StockpileError> {
-        let type_id = TypeId::of::<T>();
-        if self.services.contains_key(&type_id) {
-            return Err(StockpileError::AlreadyRegistered);
-        }
-        self.services.insert(type_id, Box::new(T::default()));
-        Ok(())
-    }
-
-    pub fn stockpile_with_impl<T: 'static>(&mut self, service: T) -> Result<(), StockpileError> {
+    pub fn stockpile<T: 'static>(&mut self, service: T) -> Result<(), StockpileError> {
         let type_id = TypeId::of::<T>();
         if self.services.contains_key(&type_id) {
             return Err(StockpileError::AlreadyRegistered);

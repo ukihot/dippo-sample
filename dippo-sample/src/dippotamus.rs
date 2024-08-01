@@ -13,10 +13,10 @@ pub fn initialize_di() -> DippotamusContainer {
     let mut container = DippotamusContainer::new();
 
     // サービスを登録
-    container.stockpile::<dyn UserRepository, UserRepositoryImpl>();
-    container.stockpile::<dyn UserOutputPort, UserPresenter>();
-    container.stockpile::<dyn UserInputPort, UserInteractor>();
-    container.stockpile::<dyn UserFactory, DefaultUserFactory>();
+    container.stockpile::<dyn UserRepository>(UserRepositoryImpl);
+    container.stockpile::<dyn UserOutputPort>(UserPresenter);
+    container.stockpile::<dyn UserInputPort>(UserInteractor);
+    container.stockpile::<dyn UserFactory>(DefaultUserFactory);
 
     container
 }

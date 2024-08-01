@@ -4,13 +4,13 @@ mod domains;
 mod infrastructures;
 mod presentations;
 
-use domains::user::user_factory::{self, DefaultUserFactory, UserFactory};
-
-use crate::applications::user_usecase::user_interactor::UserInteractor;
-use crate::infrastructures::user_repository_impl::UserRepositoryImpl;
+//use domains::user::user_factory::{self, DefaultUserFactory, UserFactory};
+//use crate::applications::user_usecase::user_interactor::UserInteractor;
+//use crate::infrastructures::user_repository_impl::UserRepositoryImpl;
+//use crate::presentations::presenter::UserPresenter;
+use crate::dippotamus::initialize_di;
+use crate::applications::user_usecase::user_input_port::UserInputPort;
 use crate::presentations::controller::UserController;
-
-use crate::presentations::presenter::UserPresenter;
 
 fn main() {
     // Using Dependency Injection with Dippo
